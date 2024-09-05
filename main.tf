@@ -66,3 +66,11 @@ resource "aws_ecs_service" "medusa_service" {
     assign_public_ip = true
   }
 }
+
+output "db_instance_endpoint" {
+  value = aws_db_instance.postgres.endpoint
+}
+
+output "ecs_service_name" {
+  value = aws_ecs_service.medusa_service.name
+}
