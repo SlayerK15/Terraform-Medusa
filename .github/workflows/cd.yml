@@ -1,32 +1,30 @@
-name: Deploy Medusa Service
+name: Deploy Medusa Backend
 
 on:
   push:
     branches:
-      - main  
+      - main
 
 jobs:
-  build_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Login to Amazon ECR
+      - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Ensure ECR Repository Exists
+        run: |
+          aws ecr describe-repositories --repository-names "medusa-server" || \
+          aws ecr create-repository --repository-name "medusa-server"
+
+      - name: Build, Tag, and Push Docker Image
         run: |
           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/medusa-server:latest .
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/medusa-server:latest
@@ -34,7 +32,8 @@ jobs:
       - name: Download Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init and Apply
-        run: |
-          terraform init
-          terraform apply -auto-approve
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Apply Terraform Configuration
+        run: terraform apply -auto-approve

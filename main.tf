@@ -1,9 +1,14 @@
 provider "aws" {
-  region  = "ap-south-1"
+  region = var.region
 }
 
 resource "aws_ecs_cluster" "medusa_cluster" {
   name = "medusa-cluster"
+}
+
+# Create ECR repository for Medusa server
+resource "aws_ecr_repository" "medusa_repo" {
+  name = "medusa-server"
 }
 
 resource "aws_ecs_task_definition" "medusa" {
@@ -17,24 +22,32 @@ resource "aws_ecs_task_definition" "medusa" {
   container_definitions = jsonencode([
     {
       name      = "medusa"
-      image     = "medusajs/medusa-server"
+      image     = "${aws_ecr_repository.medusa_repo.repository_url}:latest"
       essential = true
       portMappings = [
         {
           containerPort = 9000
-          hostPort      = 9000
         }
       ]
       environment = [
         {
           name  = "DATABASE_URL"
-          value = "postgres://username:password@hostname:port/dbname"
+          value = "postgres://${var.db_username}:${var.db_password}@${aws_db_instance.postgres.endpoint}:5432/${var.db_name}"
+        },
+        {
+          name = "JWT_SECRET"
+          value = var.jwt_secret
+        },
+        {
+          name = "COOKIE_SECRET"
+          value = var.cookie_secret
         }
       ]
     }
   ])
 }
 
+# IAM role for ECS task execution
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecs_task_execution_role"
 
@@ -53,6 +66,12 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   })
 }
 
+# Attach ECS task execution role policy
+resource "aws_iam_role_policy_attachment" "ecs_task_ecr_access" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECSTaskExecutionRolePolicy"
+}
+
 resource "aws_ecs_service" "medusa_service" {
   name            = "medusa-service"
   cluster         = aws_ecs_cluster.medusa_cluster.id
@@ -67,6 +86,7 @@ resource "aws_ecs_service" "medusa_service" {
   }
 }
 
+# Outputs
 output "db_instance_endpoint" {
   value = aws_db_instance.postgres.endpoint
 }
