@@ -34,13 +34,13 @@ resource "aws_db_subnet_group" "medusa_db_subnet_group" {
 resource "aws_security_group" "db_security_group" {
   name        = "medusa-db-security-group"
   description = "Security group for PostgreSQL"
-  vpc_id      = "vpc-id-here"
+  vpc_id      = "vpc-075cf5d6117248561"
 
   ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"] # Modify this based on your VPC CIDR block
+    cidr_blocks = ["172.31.32.0/20"] 
   }
 
   egress {
