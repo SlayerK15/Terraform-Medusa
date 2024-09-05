@@ -1,13 +1,12 @@
-# Terraform-Medusa
-
 # Medusa Backend Deployment with Terraform and GitHub Actions
 
 # Overview
 This repository contains configuration files for deploying the Medusa headless commerce backend using AWS ECS/Fargate, managed through Terraform, and automated with GitHub Actions. This setup is designed as a learning project to explore infrastructure as code and CI/CD processes.
 
-# Important Disclaimer: I am currently in the process of learning Terraform and AWS services. The configurations in this repository are built through guidance and templates, and I do not have a deep understanding of these tools yet.
+* Important Disclaimer: I am currently in the process of learning Terraform and AWS services. The configurations in this repository are built through guidance and templates, and I do not have a deep understanding of these tools yet.
 
-# Repository Structure Dockerfile: Sets up the Docker environment for the Medusa backend. main.tf: Terraform file for creating AWS resources required to run the Medusa backend. .github/workflows/deploy.yml: GitHub Actions workflow that automates the process of building the Docker image and deploying it to AWS ECS.
+# Repository Structure 
+* Dockerfile: Sets up the Docker environment for the Medusa backend. main.tf: Terraform file for creating AWS resources required to run the Medusa backend. .github/workflows/deploy.yml: GitHub Actions workflow that automates the process of building the Docker image and deploying it to AWS ECS.
 
 # File Descriptions 
 * Dockerfile : The Dockerfile is responsible for creating the container image of the Medusa backend. It installs necessary dependencies and configures the server to start upon deployment. 
