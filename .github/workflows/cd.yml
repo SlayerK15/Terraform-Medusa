@@ -26,7 +26,11 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-        
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "medusa-server" || \
+          aws ecr create-repository --repository-name "medusa-server"
+
       - name: Build, tag, and push image to Amazon ECR
         run: |
           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/medusa-server:latest .
